@@ -13,3 +13,10 @@ Example file: [organism_specific_rules.txt](https://github.com/katholt/orgspecAM
 
 Example file: [annotated_gene_report.txt](https://github.com/katholt/orgspecAMR/blob/main/annotated_gene_report.txt)
 
+## Genome report
+![genome_report](https://github.com/katholt/orgspecAMR/blob/main/genome_report.png?raw=true)
+
+Example file (PDF): [genome_report.pdf](https://github.com/katholt/orgspecAMR/blob/main/genome_report.pdf)
+
+Example file (RTF): [genome_report.pdf](https://github.com/katholt/orgspecAMR/blob/main/genome_report.rtf)
+
