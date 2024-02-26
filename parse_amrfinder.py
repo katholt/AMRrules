@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 from argparse import ArgumentParser
 import re, os
 
@@ -128,6 +130,8 @@ def main():
     # parse the organism rule file a list. Each item in the list is an object with the relevant details
     rule_list = create_rule_list(args.rules)
 
+    full_output_entries = []
+
     for report in args.reports:
         amrfinder_results = parse_amr_report(report)
         # if we have a name value in the amrfinder report, use that
@@ -137,9 +141,10 @@ def main():
         else:
             sampleID = os.path.basename(report)
         output_entries = determine_rules(amrfinder_results, rule_list, sampleID)
+        full_output_entries = full_output_entries + output_entries
         
     # now write out the output into a single file
-    write_output(output_entries, args.output)
+    write_output(full_output_entries, args.output)
 
 if __name__ == '__main__':
     main()
