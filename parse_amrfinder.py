@@ -4,28 +4,26 @@ from argparse import ArgumentParser
 import re, os
 
 class GeneRule(object):
-    def __init__(self, species, gene, drug, expected_pheno):
+    def __init__(self, species, allele, context, drug, expected_pheno):
         self.species = species
-        self.gene = gene
+        self.allele = allele
+        self.context = context
         self.drug = drug
         self.expected_pheno = expected_pheno
 
 class AMRFinderResult(object):
-    def __init__(self, gene_id, amr_class, amr_subclass, name=None):
-        self.gene_id = gene_id
+    def __init__(self, allele_id, amr_class, amr_subclass, name=None):
+        self.allele_id = allele_id
         self.amr_class = amr_class
         self.amr_subclass = amr_subclass
         # add the name if the AMRFinder report has it, as this is an optional column when running AMRFinder
         if name:
             self.name = name
-    def add_to_result(self, expected_pheno, drug, name, core="core"):
+    def add_to_result(self, expected_pheno, drug, name, context):
         self.expected_pheno = expected_pheno
         self.drug = drug
         self.name = name # update the name value here - will be what's in the result if it's there, otherwise will stay the same
-        if core:
-            self.core = core
-        else:
-            self.core = ""
+        self.context = context
         return self
 
 def get_arguments():
@@ -46,7 +44,7 @@ def create_rule_list(rule_infile):
                 header += 1
             else:
                 fields = line.strip().split('\t')
-                new_rule = GeneRule(fields[0], fields[1], fields[2], fields[3])
+                new_rule = GeneRule(fields[0], fields[1], fields[2], fields[3], fields[4])
                 rule_list.append(new_rule)
     return rule_list
 
@@ -91,23 +89,23 @@ def determine_rules(amrfinder_report_lines, rule_list, sampleID):
     output_lines = []
 
     for amrfinder_result in amrfinder_report_lines:
-        # grab the gene allele AMRFinder found
-        amrfinder_gene = amrfinder_result.gene_id
-        # okay so how do we do this? Do we take the gene and check that it's in our gene rule list?
+        # grab the allele allele AMRFinder found
+        amrfinder_allele = amrfinder_result.allele_id
+        # okay so how do we do this? Do we take the allele and check that it's in our allele rule list?
         # how are we dealing with cases where we have like blaSHV*? because we want to include all alleles, which assumes then some kind of regex matching or substring in x?
-        # gene will be blaSHV-28, we want to match blaSHV*
+        # allele will be blaSHV-28, we want to match blaSHV*
         for rule in rule_list:
-            # see if there's a matching rule for that gene
-            search_value = re.search(rule.gene, amrfinder_gene)
+            # see if there's a matching rule for that allele
+            search_value = re.search(rule.allele, amrfinder_allele)
             # this will return a value if there's something, otherwise it will be None and this won't evaluate
             if search_value:
                 # so now we've found something, what do we want to extract? we want to extract the expected phenotype to add to the table, for that rule
-                expanded_result = amrfinder_result.add_to_result(rule.expected_pheno, rule.drug, sampleID)
+                expanded_result = amrfinder_result.add_to_result(rule.expected_pheno, rule.drug, sampleID, rule.context)
                 # now escape this for loop!!
                 break
-            # if we're at the final rule, and still no search result then add an empty version, as there is no rule for this gene call
+            # if we're at the final rule, and still no search result then add an empty version, as there is no rule for this allele call
             if (rule_list.index(rule) + 1) == len(rule_list) and not search_value:
-                expanded_result = amrfinder_result.add_to_result("", "", sampleID, core="")
+                expanded_result = amrfinder_result.add_to_result("", "", sampleID, context="")
         # add it to our new list
         output_lines.append(expanded_result)
 
@@ -127,7 +125,7 @@ def write_output(output_lines, out_file):
                 expected_pheno = 'wt (S)'
             else:
                 expected_pheno = out_line.expected_pheno
-            final_line = [out_line.name, out_line.gene_id, out_line.core, expected_pheno, out_line.drug, out_line.amr_class, out_line.amr_subclass]
+            final_line = [out_line.name, out_line.allele_id, out_line.context, expected_pheno, out_line.drug, out_line.amr_class, out_line.amr_subclass]
             out.write('\t'.join(final_line) + '\n')
 
 def main():
