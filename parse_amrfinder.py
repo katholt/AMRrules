@@ -120,7 +120,14 @@ def write_output(output_lines, out_file):
         header = ['Sample', 'Allele', 'Context', 'Org interpretation', 'Drug', 'Class', 'Subclass']
         out.write('\t'.join(header) + '\n')
         for out_line in output_lines:
-            final_line = [out_line.name, out_line.gene_id, out_line.core, out_line.expected_pheno, out_line.drug, out_line.amr_class, out_line.amr_subclass]
+            # correctly format the wt resistant/susceptible codes to match poster
+            if out_line.expected_pheno == 'wt resistant':
+                expected_pheno = 'wt (R)'
+            elif out_line.expected_pheno == 'wt susceptible':
+                expected_pheno = 'wt (S)'
+            else:
+                expected_pheno = out_line.expected_pheno
+            final_line = [out_line.name, out_line.gene_id, out_line.core, expected_pheno, out_line.drug, out_line.amr_class, out_line.amr_subclass]
             out.write('\t'.join(final_line) + '\n')
 
 def main():
