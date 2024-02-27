@@ -45,6 +45,8 @@ dim(data)
 # list of drugs to appear in the report
 drugs_to_report <- c("Amikacin", "Ampicillin", "Ceftriaxone", "Ciprofloxacin", "Fosfomycin", "Gentamicin", "Meropenem", "Trimethoprim")
 map_to_subclass <- c("AMIKACIN", "BETA-LACTAM", "CEPHALOSPORIN", "QUINOLONE", "FOSFOMYCIN", "GENTAMICIN", "CARBAPENEM", "TRIMETHOPRIM")
+
+write_tsv(as_tibble(drugs_to_report), file="Kleb_local_drugs_to_report.tsv")
 ```
 
 # list of determinants that match these, annotate with Drug
@@ -72,6 +74,6 @@ table(dets$Subclass,dets$Drug)
 # write it to TSV for reference
 ```{r write_kleb_local_dict}
 
-write_delim(dets %>% select(`#Allele`,`Gene family`,`Product name`,Drug,Class,Subclass,`Pubmed reference`,`RefSeq protein`), file="Kleb_local_dict.tsv", delim="\t")
+write_tsv(dets %>% select(`#Allele`,`Gene family`,`Product name`,Drug,Class,Subclass,`Pubmed reference`,`RefSeq protein`), file="Kleb_local_dict.tsv")
 
 ```
