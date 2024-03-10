@@ -35,8 +35,9 @@ def get_arguments():
     parser = ArgumentParser(description='Parse AMRFinderPlus files with organism specific rules.')
     
     parser.add_argument('--reports', nargs='+', type=str, required=True, help='One or more AMRFinderPlus results files (should all belong to the same species).')
+    parser.add_argument('--species', required=False, default='Klebsiella pneumoniae', type=str, help='Species of the genomes in the input files (default is Klebsiella pneumoniae)')
     parser.add_argument('--organism_rules', required=True, type=str, help='Organism-specific rule set table, used to generate the annotated AMR report (all genomes included in a single report).')
-    parser.add_argument('--drug_dictionary', required=False, default='./Kleb_local_dict.Rmd/Kleb_local_dict.tsv', help='Path to drug dictionary that matches allele names with drug classes. Current default is the temporary dictionary in this repo, "./Kleb_local_dict.Rmd/Kleb_local_dict.tsv')
+    parser.add_argument('--drug_dictionary', required=False, default='./example_dict_kleb/Kleb_local_dict.tsv', help='Path to drug dictionary that matches allele names with drug classes. Current default is the temporary dictionary in this repo, "./example_dict_kleb/Kleb_local_dict.tsv')
     parser.add_argument('--output', required=True, type=str, help='Name for output file.')
 
     return parser.parse_args()

@@ -1,5 +1,5 @@
 ---
-title: "Generate local drug-level dictionary for selected drugs of relevance to Klebsiella pneumoniae report"
+title: "Generate temporary local drug-level dictionary for selected drugs of relevance to Klebsiella pneumoniae report"
 author: "Kat Holt"
 date: "`r format(Sys.time(), '%d %B, %Y')`"
 output: 
@@ -34,7 +34,7 @@ sessionInfo()
 # read refgenes data
 ``` {r read_data}
 # read as a tibble
-data <- read_delim("/Users/katholt/Library/CloudStorage/GoogleDrive-drkatholt@gmail.com/My\ Drive/AMRnet/Databases/refgenes/refgenes_270224.tsv", delim="\t")
+data <- read_delim("refgenes_270224.tsv", delim="\t")
 
 # print the dimensions of the table for reference
 dim(data)
