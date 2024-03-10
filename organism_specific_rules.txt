@@ -1,5 +1,0 @@
-species	gene	drug	expected phenotype	evidence
-Klebsiella pneumoniae	blaSHV*	ampicillin	resistant	34234121
-Klebsiella pneumoniae	oqxAB	multiple drug	susceptible	30834112
-Klebsiella pneumoniae	fosA5	fosfomycin	susceptible	28851843
-Klebsiella pneumoniae	fosA6	fosfomycin	susceptible	28851843
