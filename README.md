@@ -43,4 +43,4 @@ Example file (PDF): [genome_report.pdf](genome_report.pdf)
 Example file (RTF): [genome_report.rtf](genome_report.rtf)
 
 ## Contributors
-This concept was workshopped by members of the [Holt lab](https://holtlab.net) at [London School of Hygiene and Tropical Medicine](https://www.lshtm.ac.uk) and further developed in collaboration with Jane Hawkey at [Monash University].
+This concept was workshopped by members of the [Holt lab](https://holtlab.net) at [London School of Hygiene and Tropical Medicine](https://www.lshtm.ac.uk) and further developed in collaboration with [Jane Hawkey](https://github.com/jhawkey) at [Monash University](https://research.monash.edu/en/persons/jane-hawkey).
