@@ -114,10 +114,13 @@ def parse_amr_report(report_file, drug_dict):
     
     return amrfinder_report_lines
 
-def determine_rules(amrfinder_report_lines, rule_list, sampleID):
+def determine_rules(amrfinder_report_lines, rule_list, sampleID, species):
 
     # this is our list of result line classes that have the info we want
     output_lines = []
+
+    # extract the rules relevant to the species
+    relevant_rules = [rule for rule in rule_list if rule.species == species]
 
     for amrfinder_result in amrfinder_report_lines:
         # grab the allele allele AMRFinder found
@@ -137,8 +140,6 @@ def determine_rules(amrfinder_report_lines, rule_list, sampleID):
                 amrfinder_result.drug = rule.drug
                 amrfinder_result.name = sampleID
                 amrfinder_result.context = rule.context
-
-
 
                 # now escape this for loop!!
                 break
@@ -218,7 +219,7 @@ def main():
             sampleID = amrfinder_results[0].name
         else:
             sampleID = os.path.basename(report)
-        output_entries = determine_rules(amrfinder_results, rule_list, sampleID)
+        output_entries = determine_rules(amrfinder_results, rule_list, sampleID, args.species)
 
         # sort the lines
         sorted_entries = dict()
