@@ -2,6 +2,7 @@
 
 from argparse import ArgumentParser
 import re, os
+from itertools import chain
 
 class GeneRule(object):
 
@@ -14,13 +15,18 @@ class GeneRule(object):
 
 class AMRFinderResult(object):
 
-    def __init__(self, allele_id, amr_class, amr_subclass, drug, name=None):
+    def __init__(self, allele_id, amr_class, amr_subclass, drug, element_type, element_subtype, scope, sequence_name, protein_onwards, method_onwards, name=None):
         self.allele_id = allele_id
         self.amr_class = amr_class
         self.amr_subclass = amr_subclass
         self.drug = str(drug)
-        # Not 
         self.name = name
+        self.element_type = element_type
+        self.element_subtype = element_subtype
+        self.scope = scope
+        self.sequence_name = sequence_name
+        self.protein_onwards = protein_onwards
+        self.method_onwards = method_onwards
 
         # Assigned during rule processing
         self.expected_pheno = str()
@@ -94,6 +100,14 @@ def parse_amr_report(report_file, drug_dict):
                 except:
                     name_col = None
                 element_type_col = col_headers.index("Element type")
+                element_subtype_col = col_headers.index("Element subtype")
+                scope_col = col_headers.index("Scope")
+                seq_name_col = col_headers.index("Sequence name")
+                # we want all the columns from the original AMRFinder output, but it's going to be annoying to save them all as individual values inside the class object
+                # so instead let's just get everything after 'name' (or 'Protein identifier' if name not present) up to 'Gene symbol' and save that as one item
+                protein_id_col = col_headers.index("Protein identifier")
+                # and then let's grab everything after 'Subclass' and save that as it's own single entry
+                method_col = col_headers.index("Method")
                 header += 1
             else:
                 # only parse the line if the element_type is AMR
@@ -106,11 +120,19 @@ def parse_amr_report(report_file, drug_dict):
                         gene_drug = ''
                     class_type = fields[class_col]
                     subclass_type = fields[subclass_col]
+                    # now get all values from protein ID to (but not including) gene symbol
+                    protein_id_onwards = fields[protein_id_col:protein_id_col+5]
+                    # and now grab the stuff at the end
+                    method_onwards = fields[method_col:]
                     if name_col != None:
                         name_id = fields[name_col]
-                        amrfinder_report_lines.append(AMRFinderResult(gene_allele, class_type, subclass_type, gene_drug, name=name_id))
+                        amrfinder_report_lines.append(AMRFinderResult(gene_allele, class_type, subclass_type, gene_drug, fields[element_type_col],
+                                                                      fields[element_subtype_col], fields[scope_col], fields[seq_name_col], 
+                                                                      protein_id_onwards, method_onwards, name=name_id))
                     else:
-                        amrfinder_report_lines.append(AMRFinderResult(gene_allele, class_type, subclass_type, gene_drug))
+                        amrfinder_report_lines.append(AMRFinderResult(gene_allele, class_type, subclass_type, gene_drug, fields[element_type_col],
+                                                                      fields[element_subtype_col], fields[scope_col], fields[seq_name_col], 
+                                                                      protein_id_onwards, method_onwards))
     
     return amrfinder_report_lines
 
@@ -151,12 +173,29 @@ def determine_rules(amrfinder_report_lines, rule_list, sampleID, species):
 
     return output_lines
 
-def write_output(output_lines, out_file):
+def remove_nested_lists(line_to_write):
+    unnested_list = []
+    for item in line_to_write:
+        if type(item) == list:
+            for value in item:
+                unnested_list.append(value)
+        else:
+            unnested_list.append(item)
+    return unnested_list
+
+def write_output(output_lines, out_file, species, version):
 
     with open(out_file, "w") as out:
         # add name to the header if it exists, otherwise don't bother
-        header = ['Sample', 'Allele', 'Context', 'Org interpretation', 'Drug', 'Class', 'Subclass']
+        header = ['Name', 'Protein identifier', 'Contig id', 'Start', 'Stop', 'Strand', 'Gene symbol', 'Sequence name', 
+                  'Species interpretation', 'Context', 'Org interpretation', 'Drug', 'Scope', 'Element type', 'Element subtype', 'Class', 'Subclass',
+                  'Method', 'Target length', 'Reference sequence length', '% Coverage of reference sequence', '% Identity to reference sequence',
+                  'Alignment length', 'Accession of closest sequence', 'Name of closest sequence', 'HMM id', 'HMM description']
         out.write('\t'.join(header) + '\n')
+
+        # get the value for species and version for the 'Species interpretation' column
+        species_interp = species + '; ' + version
+
         for out_line in output_lines:
             # correctly format the wt resistant/susceptible codes to match poster
             if out_line.expected_pheno == 'wt resistant':
@@ -165,7 +204,12 @@ def write_output(output_lines, out_file):
                 expected_pheno = 'wt (S)'
             else:
                 expected_pheno = out_line.expected_pheno
-            final_line = [out_line.name, out_line.allele_id, out_line.context, expected_pheno, out_line.drug, out_line.amr_class, out_line.amr_subclass]
+            final_line = [out_line.name, out_line.protein_onwards, out_line.allele_id, out_line.sequence_name,
+                        species_interp, out_line.context, expected_pheno, out_line.drug, 
+                        out_line.scope, out_line.element_type, out_line.element_subtype, 
+                        out_line.amr_class, out_line.amr_subclass, out_line.method_onwards]
+            #TODO: see if there is a faster/more memory efficient way to do this
+            final_line = remove_nested_lists(final_line)
             out.write('\t'.join(final_line) + '\n')
 
 def organism_aware_report(output_lines, local_drug_list):
@@ -245,7 +289,8 @@ def main():
         full_output_entries = full_output_entries + output_entries
         
     # now write out the output into a single file
-    write_output(full_output_entries, args.output)
+    #TODO: encode version number correctly 
+    write_output(full_output_entries, args.output, args.species, 'v1.1')
 
 if __name__ == '__main__':
     main()
