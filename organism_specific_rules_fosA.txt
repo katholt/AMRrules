@@ -1,0 +1,5 @@
+species	allele	context	drug	phenotype	PMID	note
+Klebsiella pneumoniae	blaSHV	core	ampicillin	R (WT)	32284385	"Specific alleles can be ESBL, these are mostly mobile"
+Klebsiella pneumoniae	oqxA	core	multiple drug	S (WT)	30834112	"Wildtype core gene, not expected to confer multiple drug resistance unless mobilised under strong promoter"
+Klebsiella pneumoniae	oqxB	core	multiple drug	S (WT)	30834112	"Wildtype core gene, not expected to confer multiple drug resistance unless mobilised under strong promoter"
+Klebsiella pneumoniae	fosA5;fosA6;fosA10	core	fosfomycin	S (WT)	33128341	"Wildtype core genes, not expected to confer multiple drug resistance unless mobilised under strong promoter. Other fosA alleles originate in other organisms and likely to be mobilised under a strong promoter, resulting in R (WT)."
